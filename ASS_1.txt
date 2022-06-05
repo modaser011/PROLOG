@@ -1,0 +1,131 @@
+
+append1( [], L, L).
+append1( [H|T], L2, [H|NT]):-
+	append1(T, L2, NT).
+
+member1(X,[X|_]).
+member1(X,[_|X1]) :- member1(X,X1).
+
+
+
+reverse([H|T],A,R):-  reverse(T,[H|A],R).
+reverse([],A,A).
+
+
+studentsInCourse(C,L):-
+    studentsInCourse(C,[],L).
+studentsInCourse(C,L1,L):-
+    student(A,C,B),
+    not(member1([A,B],L1)), !,
+    append1(L1,[[A,B]],L2),
+    studentsInCourse(C,L2,L).
+studentsInCourse(_,L,L).
+
+length1([],0).
+length1([_|T],L):-
+    length1(T,L1),
+    L is L1+1.
+
+numStudents(C,L):-
+    numStudents(C,[],L11),
+length1(L11,L).
+numStudents(C,L1,L):-
+    student(A,C,B),
+    not(member1([A,B],L1)), !,
+    append1(L1,[[A,B]],L2),
+    numStudents(C,L2,L).
+numStudents(_,L,L).
+
+max21([],0).
+max21([H|T],L):-
+    max21(T,L1),max1(H,L1,L).
+
+max1(L,L1,L2):-
+    L1 >L,
+    L2 is L1.
+
+max1(L,L1,L2):-
+    L1 <L,
+    L2 is L.
+
+maxStudentGrade(C,L1):-
+    maxStudentGrade(C,[],L),max21(L,L1).
+maxStudentGrade(C,L1,L):-
+    student(C,_,A),
+    not(member1(A,L1)), !,
+    append1(L1,[A],L2),
+    maxStudentGrade(C,L2,L).
+maxStudentGrade(_,L,L).
+
+mapping(L,A):-
+   L==0,A = 'zero'.
+mapping(L,A):-
+   L==2,A = 'two'.
+mapping(L,A):-
+   L==3,A = 'three'.
+mapping(L,A):-
+   L==4,A = 'four'.
+mapping(L,A):-
+   L==5,A = 'five'.
+mapping(L,A):-
+   L==6,A = 'six'.
+mapping(L,A):-
+   L==7,A = 'seven'.
+mapping(L,A):-
+   L==8,A = 'eight'.
+mapping(L,A):-
+   L==9,A = 'nine'.
+mapping(L,A):-
+   L==1,A = 'one'.
+digit(0,[]).
+digit(E,[H|T]):-
+    M is E mod 10,
+   mapping(M,H),
+   E1 is E//10,
+   digit(E1,T).
+
+gradeInWords(C,A,L1):-
+      student(C,A,W),digit(W,D),reverse(D,[],L1).
+
+preq(Cour,[H|T]):-
+prerequisite(H,Cour),
+preq(H,T).
+preq(Cour,[]).
+
+remain(S,[H|T],L):-
+student(S,H,C), C>=50,
+remain(S,T,L),!.
+
+remain(S,[H|T],[H|T1]):-
+remain(S,T,T1).
+remain(_,[],[]).
+
+remainingCourses(S,A,R):-
+preq(A,L1),remain(S,L1,L),length(L,X),length(L1,Y),reverse(L,[],R), Y =\=X.
+
+
+rem(S,C,List):-
+    (student(S,C,D)->
+       ( D>50 ->
+        List = C
+         ;
+       false
+       )
+       ;
+        prerequisite(C2,C),!,
+        rem(S,C2,List)
+    ).
+rem(_,_,List):-
+    false.
+remainingCourses(S,C,Courses):-
+    rem(S,C,H),
+    all(H,Courses,C).
+all(H,List,C):-
+    all(H,[],List,C),!.
+all(H,Temp,List,C):-
+    prerequisite(C2,C),
+    not(C2 = H),!,
+      append1([C2],Temp,NewList),
+      all(H,NewList,List,C2).
+all(_,Temp,List,_):-
+	append1(Temp,[],List).
